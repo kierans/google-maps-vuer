@@ -10,13 +10,10 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "sourceMap": true,
-    "baseUrl": "types",
+    "baseUrl": ".",
     "types": [
       "webpack-env",
       "mocha"
-    ],
-    "typeRoots": [
-      "types"
     ],
     "paths": {
       "@/*": [
@@ -35,7 +32,8 @@
     "src/**/*.tsx",
     "src/**/*.vue",
     "tests/**/*.ts",
-    "tests/**/*.tsx"
+    "tests/**/*.tsx",
+    "types/**/*.ts"
   ],
   "exclude": [
     "node_modules"
