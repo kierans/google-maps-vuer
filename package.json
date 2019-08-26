@@ -5,19 +5,26 @@
   "scripts": {
     "build": "vue-cli-service build -t lib -n google-maps-vuer src/main.ts",
     "lint": "vue-cli-service lint",
+    "test:e2e": "vue-cli-service test:e2e --url http://localhost:9912",
+    "test:serve": "vue-cli-service serve --port 9912 --copy tests/e2e/app/main.ts",
     "test:unit": "vue-cli-service test:unit"
   },
   "dependencies": {},
   "devDependencies": {
     "@types/mocha": "^5.2.4",
     "@vue/cli-plugin-babel": "^3.10.0",
+    "@vue/cli-plugin-e2e-nightwatch": "^3.11.0",
     "@vue/cli-plugin-typescript": "^3.10.0",
     "@vue/cli-plugin-unit-mocha": "^3.10.0",
     "@vue/cli-service": "^3.10.0",
     "@vue/test-utils": "1.0.0-beta.29",
+    "chromedriver": "^76.0.0",
     "core-js": "^2.6.5",
+    "deepmerge": "^4.0.0",
     "hamjest": "^3.2.5",
+    "portfinder": "^1.0.21",
     "typescript": "^3.4.3",
+    "url": "^0.11.0",
     "vue": "^2.6.10",
     "vue-class-component": "^7.0.2",
     "vue-property-decorator": "^8.1.0",
@@ -25,5 +32,10 @@
   },
   "peerDependencies": {
     "vue": "^2.6.10"
-  }
+  },
+  "keywords": [
+    "vue",
+    "googlemaps",
+    "google-maps"
+  ]
 }

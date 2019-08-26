@@ -13,6 +13,7 @@
     "interface-name": false,
     "no-consecutive-blank-lines": false,
     "object-literal-sort-keys": false,
+    "one-line": [ true, "check-open-brace" ],
     "only-arrow-functions": false,
     "ordered-imports": false,
     "trailing-comma": [ false ],

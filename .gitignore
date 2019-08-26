@@ -19,3 +19,6 @@ yarn-error.log*
 *.njsproj
 *.sln
 *.sw?
+
+# We don't want API keys committed.
+/tests/e2e/app/api-key.ts
