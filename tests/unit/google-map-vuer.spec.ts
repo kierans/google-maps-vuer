@@ -111,18 +111,14 @@ describe("GoogleMapVuer", function() {
 				assertThat(window[GoogleMapVuer.DEFAULT_CALLBACK_NAME], is(defined()));
 			});
 
-			it("should register $maps instance var", function() {
+			it("should register maps callback promise", async function() {
 				const opts: GoogleMapsAPIOptions = {
 					apiKey: API_KEY
 				};
 
 				vue.use(GoogleMapVuer, opts);
 
-				const vm: Vue = new vue({});
-
-				assertThat(vm.$maps, is(defined()));
-				assertThat(vm.$maps.loaded, is(defined()));
-				assertThat(vm.$maps.version, is(GoogleMapVuer.DEFAULT_VERSION));
+				assertThat(vue.googleMaps, is(defined()));
 			});
 
 			it("should use callback name when provided", function() {

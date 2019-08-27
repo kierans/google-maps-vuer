@@ -32,22 +32,20 @@ export interface GoogleMapsAPIOptions {
  * Details about the Google Maps API loaded into the window
  */
 export interface GoogleMapsAPI {
-	/** Resolves when the API is loaded into the window */
-	loaded: Promise<void>;
-
 	version: string;
 }
 
 function createGoogleMapLoadedHook(vue: VueConstructor, options: GoogleMapsAPIOptions) {
-	vue.prototype.$maps = {
-		loaded: new Promise((resolve) => {
-			// @ts-ignore
-			window[options.callback] = function() {
-				resolve();
-			};
-		}),
-		version: options.version
-	};
+	vue.googleMaps = new Promise((resolve) => {
+		// @ts-ignore
+		window[options.callback] = function() {
+			resolve({
+				version: options.version!
+			});
+		};
+	});
+
+	vue.googleMaps.then((api) => vue.prototype.$maps = api);
 }
 
 function checkOptions(options?: GoogleMapsAPIOptions) {
