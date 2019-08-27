@@ -7,7 +7,7 @@ import { assertThat, defined, instanceOf, is, throws } from "hamjest";
 import merge from "deepmerge";
 import URL from "url";
 
-import { GoogleMapOptions, GoogleMapVuer } from "@/components/GoogleMapVuer";
+import { GoogleMapsAPIOptions, GoogleMapVuer } from "@/components/GoogleMapVuer";
 
 const API_KEY: string = "abc123def";
 const CLIENT_ID: string = "gme-foo";
@@ -16,7 +16,7 @@ describe("GoogleMapVuer", function() {
 	const body = document.getElementsByTagName("body").item(0)!;
 	let vue: VueConstructor;
 
-	const loadingMaps: any = (opts: GoogleMapOptions): any => {
+	const loadingMaps: any = (opts: GoogleMapsAPIOptions): any => {
 		return () => {
 			vue.use(GoogleMapVuer, opts);
 		};
@@ -47,7 +47,7 @@ describe("GoogleMapVuer", function() {
 	});
 
 	it("should throw an error if both API key and Client ID specified", function() {
-		const opts: GoogleMapOptions = {
+		const opts: GoogleMapsAPIOptions = {
 			apiKey: API_KEY,
 			clientId: CLIENT_ID
 		};
@@ -57,7 +57,7 @@ describe("GoogleMapVuer", function() {
 
 	describe("loading Google Maps into the DOM", function() {
 		it("should load Google Maps API with API key", function() {
-			const opts: GoogleMapOptions = {
+			const opts: GoogleMapsAPIOptions = {
 				apiKey: API_KEY
 			};
 
@@ -67,7 +67,7 @@ describe("GoogleMapVuer", function() {
 		});
 
 		it("should load Google Maps API with Client ID", function() {
-			const opts: GoogleMapOptions = {
+			const opts: GoogleMapsAPIOptions = {
 				clientId: CLIENT_ID
 			};
 
@@ -77,7 +77,7 @@ describe("GoogleMapVuer", function() {
 		});
 
 		it("should load Google Maps API with default version", function() {
-			const opts: GoogleMapOptions = {
+			const opts: GoogleMapsAPIOptions = {
 				apiKey: API_KEY
 			};
 
@@ -91,7 +91,7 @@ describe("GoogleMapVuer", function() {
 
 		it("should load Google Maps API with specified version", function() {
 			const version = "quartely";
-			const opts: GoogleMapOptions = {
+			const opts: GoogleMapsAPIOptions = {
 				apiKey: API_KEY,
 				version
 			};
@@ -103,7 +103,7 @@ describe("GoogleMapVuer", function() {
 
 		describe("API callback", function() {
 			it("should register callback for Maps API", function() {
-				const opts: GoogleMapOptions = {
+				const opts: GoogleMapsAPIOptions = {
 					apiKey: API_KEY
 				};
 
@@ -112,7 +112,7 @@ describe("GoogleMapVuer", function() {
 			});
 
 			it("should register $maps instance var", function() {
-				const opts: GoogleMapOptions = {
+				const opts: GoogleMapsAPIOptions = {
 					apiKey: API_KEY
 				};
 
@@ -122,11 +122,12 @@ describe("GoogleMapVuer", function() {
 
 				assertThat(vm.$maps, is(defined()));
 				assertThat(vm.$maps.loaded, is(defined()));
+				assertThat(vm.$maps.version, is(GoogleMapVuer.DEFAULT_VERSION));
 			});
 
 			it("should use callback name when provided", function() {
 				const callback = "whatever";
-				const opts: GoogleMapOptions = {
+				const opts: GoogleMapsAPIOptions = {
 					apiKey: API_KEY,
 					callback
 				};

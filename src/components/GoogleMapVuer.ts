@@ -4,7 +4,7 @@ const DEFAULT_CALLBACK_NAME = "onGoogleMapsLoaded";
 const DEFAULT_VERSION = "3.37";
 
 export const GoogleMapVuer = {
-	install: (vue: VueConstructor, options?: GoogleMapOptions) => {
+	install: (vue: VueConstructor, options?: GoogleMapsAPIOptions) => {
 		checkOptions(options);
 
 		createGoogleMapLoadedHook(vue, options!);
@@ -19,29 +19,38 @@ export const GoogleMapVuer = {
 	},
 	DEFAULT_VERSION,
 	DEFAULT_CALLBACK_NAME
-} as PluginObject<GoogleMapOptions>;
+} as PluginObject<GoogleMapsAPIOptions>;
 
-export interface GoogleMapOptions {
+export interface GoogleMapsAPIOptions {
 	apiKey?: string;
 	clientId?: string;
 	version?: string;
 	callback?: string;
 }
 
-function createGoogleMapLoadedHook(vue: VueConstructor, options: GoogleMapOptions) {
-	options.callback = options.callback || DEFAULT_CALLBACK_NAME;
+/**
+ * Details about the Google Maps API loaded into the window
+ */
+export interface GoogleMapsAPI {
+	/** Resolves when the API is loaded into the window */
+	loaded: Promise<void>;
 
+	version: string;
+}
+
+function createGoogleMapLoadedHook(vue: VueConstructor, options: GoogleMapsAPIOptions) {
 	vue.prototype.$maps = {
 		loaded: new Promise((resolve) => {
 			// @ts-ignore
 			window[options.callback] = function() {
 				resolve();
 			};
-		})
+		}),
+		version: options.version
 	};
 }
 
-function checkOptions(options?: GoogleMapOptions) {
+function checkOptions(options?: GoogleMapsAPIOptions) {
 	if (!options) {
 		throw new Error("Need GoogleMap options");
 	}
@@ -53,15 +62,16 @@ function checkOptions(options?: GoogleMapOptions) {
 	if (options.apiKey && options.clientId) {
 		throw new Error("Specify only API key or Client ID not both");
 	}
+
+	options.callback = options.callback || DEFAULT_CALLBACK_NAME;
+	options.version  = options.version || DEFAULT_VERSION;
 }
 
-function createQueryString(options: GoogleMapOptions) {
-	const version = options.version || DEFAULT_VERSION;
-
-	return `?v=${version}&callback=${options.callback}${auth(options)}`;
+function createQueryString(options: GoogleMapsAPIOptions) {
+	return `?v=${options.version}&callback=${options.callback}${auth(options)}`;
 }
 
-function auth(options: GoogleMapOptions) {
+function auth(options: GoogleMapsAPIOptions) {
 	if (options.apiKey) {
 		return `&key=${options.apiKey}`;
 	}
