@@ -11,7 +11,9 @@
   },
   "dependencies": {},
   "devDependencies": {
+    "@types/googlemaps": "^3.37.4",
     "@types/mocha": "^5.2.4",
+    "@types/sinon": "^7.0.13",
     "@vue/cli-plugin-babel": "^3.10.0",
     "@vue/cli-plugin-e2e-nightwatch": "^3.11.0",
     "@vue/cli-plugin-typescript": "^3.10.0",

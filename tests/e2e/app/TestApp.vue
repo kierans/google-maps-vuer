@@ -1,26 +1,33 @@
 <template>
 	<div id="app" class="fill-window">
-		<HelloWorld msg="Test App"></HelloWorld>
+		<GoogleMap
+			id="map"
+			:options="{
+				center: { lat: -37.814218, lng: 144.963161 },
+				zoom: 12,
+			}">
+		</GoogleMap>
 	</div>
 </template>
 
 <script>
-	import HelloWorld from "@/components/HelloWorld.vue";
+import GoogleMap from "@/components/GoogleMap.vue";
 
-	export default {
-		name: "TestApp",
-		components: {
-			HelloWorld
-		},
-		created() {
-			// this.$maps.loaded.then(() => console.log("Maps loaded"));
-		}
-	};
+export default {
+	name: "TestApp",
+	components: {
+		GoogleMap: GoogleMap.createComponent()
+	}
+};
 </script>
 
 <style>
-	.fill-window {
-		width: 100%;
-		height: 100%;
-	}
+html, body {
+	height: 100%;
+}
+
+.fill-window {
+	width: 100%;
+	height: 100%;
+}
 </style>
