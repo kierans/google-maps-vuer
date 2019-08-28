@@ -14,7 +14,8 @@
     "types": [
       "webpack-env",
       "mocha",
-      "googlemaps"
+      "googlemaps",
+      "vue"
     ],
     "paths": {
       "@/*": [

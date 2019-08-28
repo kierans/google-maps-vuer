@@ -11,12 +11,13 @@
 </template>
 
 <script>
+import { createComponent } from "@/components/AsyncGoogleMapComponent";
 import GoogleMap from "@/components/GoogleMap.vue";
 
 export default {
 	name: "TestApp",
 	components: {
-		GoogleMap: GoogleMap.createComponent()
+		GoogleMap: createComponent(GoogleMap)
 	}
 };
 </script>

@@ -4,19 +4,12 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
-import { AsyncComponentPromise } from "vue/types/options";
 
 /**
  * Do not instantiate directly.
  */
 @Component
 export default class GoogleMap extends Vue {
-	public static createComponent(): AsyncComponentPromise {
-		return (resolve: any) => {
-			Vue.googleMaps.then(() => resolve(GoogleMap));
-		};
-	}
-
 	private static generateId(): string {
 		return `gmv-${Math.floor(Math.random() * Math.floor(1000))}`;
 	}
