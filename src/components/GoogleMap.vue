@@ -5,6 +5,10 @@
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
 
+interface GoogleMapData {
+	map: google.maps.Map | null;
+}
+
 /**
  * Do not instantiate directly.
  */
@@ -21,12 +25,10 @@ export default class GoogleMap extends Vue {
 	private readonly options!: google.maps.MapOptions;
 
 	// noinspection JSUnusedGlobalSymbols
-	public data() {
-		const data: {
-			[map: string]: google.maps.Map | undefined
-		} = {};
-
-		return data;
+	public data(): GoogleMapData {
+		return {
+			map: null,
+		} as GoogleMapData;
 	}
 
 	// noinspection JSUnusedGlobalSymbols
