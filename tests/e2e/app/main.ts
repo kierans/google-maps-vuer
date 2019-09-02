@@ -3,7 +3,7 @@
  */
 import Vue from "vue";
 import App from "./TestApp.vue";
-import { GoogleMapVuer } from "@/components/GoogleMapVuer";
+import { GoogleMapVuer } from "@/GoogleMapVuer";
 
 import API_KEY from "./api-key";
 

@@ -1,1 +1,1 @@
-export * from "./components/HelloWorld.vue";
+export * from "./GoogleMapVuer";

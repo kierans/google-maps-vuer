@@ -7,7 +7,7 @@ import { assertThat, defined, instanceOf, is, throws } from "hamjest";
 import merge from "deepmerge";
 import URL from "url";
 
-import { GoogleMapsAPIOptions, GoogleMapVuer } from "@/components/GoogleMapVuer";
+import { GoogleMapsAPIOptions, GoogleMapVuer } from "@/GoogleMapVuer";
 
 const API_KEY: string = "abc123def";
 const CLIENT_ID: string = "gme-foo";
