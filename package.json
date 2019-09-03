@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "vue-cli-service build -t lib -n google-maps-vuer src/main.ts",
+    "build": "vue-cli-service build --target lib --name google-maps-vuer src/main.ts",
     "lint": "vue-cli-service lint",
     "test:e2e": "vue-cli-service test:e2e --url http://localhost:9912",
     "test:serve": "vue-cli-service serve --port 9912 --copy tests/e2e/app/main.ts",
