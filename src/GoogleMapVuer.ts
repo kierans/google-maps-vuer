@@ -36,7 +36,7 @@ export interface GoogleMapsAPI {
 }
 
 function createGoogleMapLoadedHook(vue: VueConstructor, options: GoogleMapsAPIOptions) {
-	vue.googleMaps = new Promise((resolve) => {
+	vue.googleMaps = new Promise((resolve: (value: GoogleMapsAPI) => void) => {
 		// @ts-ignore
 		window[options.callback] = function() {
 			resolve({
