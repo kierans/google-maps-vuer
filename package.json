@@ -2,6 +2,7 @@
   "name": "google-maps-vuer",
   "version": "0.1.0",
   "private": true,
+  "main": "dist/google-maps-vuer.common.js",
   "scripts": {
     "build": "vue-cli-service build --target lib --name google-maps-vuer src/main.ts",
     "lint": "vue-cli-service lint",
