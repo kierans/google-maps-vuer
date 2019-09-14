@@ -10,10 +10,13 @@
     "test:serve": "vue-cli-service serve --port 9912 --copy tests/e2e/app/main.ts",
     "test:unit": "vue-cli-service test:unit"
   },
-  "dependencies": {},
+  "dependencies": {
+    "q": "^1.5.1"
+  },
   "devDependencies": {
     "@types/googlemaps": "^3.37.4",
     "@types/mocha": "^5.2.4",
+    "@types/q": "^1.5.2",
     "@types/sinon": "^7.0.13",
     "@vue/cli-plugin-babel": "^3.10.0",
     "@vue/cli-plugin-e2e-nightwatch": "^3.11.0",
@@ -26,6 +29,7 @@
     "deepmerge": "^4.0.0",
     "hamjest": "^3.2.5",
     "portfinder": "^1.0.21",
+    "sinon": "^7.4.2",
     "typescript": "^3.4.3",
     "url": "^0.11.0",
     "vue": "^2.6.10",
