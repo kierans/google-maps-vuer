@@ -9,6 +9,7 @@
     ]
   },
   "rules": {
+    "align": [ false ],
     "indent": [ true, "tabs", 2 ],
     "interface-name": false,
     "no-consecutive-blank-lines": false,

@@ -1,19 +1,42 @@
 <template>
-	<div :id="id" class="google-map-container" :data-google-maps-version="version"></div>
+	<div :id="id" class="google-map-container" :data-google-maps-version="version">
+		<slot></slot>
+	</div>
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from "vue-property-decorator";
+import Q from "q";
+import { mixins } from "vue-class-component";
+import { Component, Prop, Provide, Vue } from "vue-property-decorator";
 
-interface GoogleMapData {
-	map: google.maps.Map | null;
-}
+import DeferredMapObject from "@/components/DeferredMapObject";
+import { bindComponentToMapObject } from "@/components/MapObjectBindings";
+import GoogleMapComponent from "@/components/GoogleMapComponent";
 
-/**
- * Do not instantiate directly.
- */
+const props: string[] = [
+	"center", "clickableIcons", "heading", "mapTypeId", "options", "streetView", "tilt", "zoom"
+];
+
+const events: string[] = [
+	"click", "dblclick", "drag", "dragend", "dragstart", "idle", "mousemove", "mouseout", "mouseover", "rightclick",
+	"tilesloaded"
+];
+
+const methods: string[] = [
+	"fitBounds", "panBy", "panTo", "panToBounds",
+];
+
+// TODO: Map properties: [ controls, data, mapTypes, overlayMapTypes ]
+
 @Component
-export default class GoogleMap extends Vue {
+export default class GoogleMap
+		extends mixins(Vue, DeferredMapObject, bindComponentToMapObject(
+			props,
+			events,
+			methods
+		))
+		implements GoogleMapComponent<google.maps.Map> {
+
 	private static generateId(): string {
 		return `gmv-${Math.floor(Math.random() * Math.floor(1000))}`;
 	}
@@ -24,16 +47,13 @@ export default class GoogleMap extends Vue {
 	@Prop()
 	private readonly options!: google.maps.MapOptions;
 
-	// noinspection JSUnusedGlobalSymbols
-	public data(): GoogleMapData {
-		return {
-			map: null,
-		} as GoogleMapData;
+	public mounted() {
+		this.resolveMapObject(new window.google.maps.Map(document.getElementById(this.id), this.options));
 	}
 
-	// noinspection JSUnusedGlobalSymbols
-	public mounted() {
-		this.$data.map = new window.google.maps.Map(document.getElementById(this.id), this.options);
+	@Provide()
+	public getMap(): Q.Promise<google.maps.Map> {
+		return this.getMapObject();
 	}
 
 	get version(): string {
