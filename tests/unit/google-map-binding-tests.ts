@@ -1,20 +1,19 @@
 import Q, { Deferred } from "q";
-import { VueConstructor } from "vue";
-import { Vue } from "vue/types/vue";
 
-import DeferredMapObject from "@/components/DeferredMapObject";
-
-import { assertThat, equalTo, is } from "hamjest";
+import { assertThat, equalTo, hasItem, is } from "hamjest";
 import * as sinon from "sinon";
 import { SinonSpy, SinonStub } from "sinon";
-import { shallowMount, ThisTypedShallowMountOptions, VueClass, Wrapper } from "@vue/test-utils";
+import { shallowMount, ThisTypedShallowMountOptions, Wrapper } from "@vue/test-utils";
 
 import { MVCObjectPolyfill } from "./google-map-stubs";
-import { MabObjectBindingDefinition } from "@/components/MapObjectBindings";
+import {
+	mapObjectToBeSettled,
+	VueConstructorFactory,
+	VueGoogleMapComponent,
+	VueGoogleMapComponentInstance
+} from "./google-map-tests-helper";
 
-type VueConstructorFactory = () => VueConstructor;
-type VueGoogleMapComponent<APIType extends google.maps.MVCObject> = VueClass<Vue & DeferredMapObject>;
-type VueGoogleMapComponentInstance<APIType extends google.maps.MVCObject> = Vue & DeferredMapObject;
+import { MabObjectBindingDefinition } from "@/components/MapObjectBindings";
 
 export interface MapObjectBindingData<APIType extends google.maps.MVCObject> {
 	component: VueGoogleMapComponent<APIType>;
@@ -51,7 +50,14 @@ function generateConstructorTest<APIType extends google.maps.MVCObject>(
 				...options
 			});
 
-			assertThat(spy.calledOnceWith(sinon.match.any, sinon.match(opts)), is(true));
+			assertThat(spy.calledOnce, is(true));
+			assertThat(spy.calledWithNew(), is(true));
+
+			/*
+			 * We don't care about other arguments that are passed to the constructor as they are API class specific.
+			 * What we care about is that the options are passes as a constructor argument.
+			 */
+			assertThat(spy.args[0], hasItem(opts));
 		}
 		finally {
 			spy.restore();
@@ -193,14 +199,6 @@ function generateMethodsTests<APIType extends google.maps.MVCObject>(
 			});
 		});
 	});
-}
-
-async function mapObjectToBeSettled(vm: VueGoogleMapComponentInstance<any>) {
-	/*
-	 * When we know that the underlying Maps API object has been settled we can run our test.
-	 */
-	// tslint:disable-next-line:no-empty
-	await vm.getMapObject().finally(() => {});
 }
 
 /*

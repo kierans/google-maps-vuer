@@ -66,8 +66,39 @@ export class MapPolyfill extends MVCObjectPolyfill {
 	public setZoom() {}
 }
 
+export class MarkerPolyfill extends MVCObjectPolyfill {
+	public getAnimation() {}
+	public getClickable() {}
+	public getCursor() {}
+	public getDraggable() {}
+	public getIcon() {}
+	public getLabel() {}
+	public getMap() {}
+	public getOpacity() {}
+	public getPosition() {}
+	public getShape() {}
+	public getTitle() {}
+	public getVisible() {}
+	public getZIndex() {}
+	public setAnimation() {}
+	public setClickable() {}
+	public setCursor() {}
+	public setDraggable() {}
+	public setIcon() {}
+	public setLabel() {}
+	public setMap() {}
+	public setOpacity() {}
+	public setOptions() {}
+	public setPosition() {}
+	public setShape() {}
+	public setTitle() {}
+	public setVisible() {}
+	public setZIndex() {}
+}
+
 window.google = {
 	maps: {
-		Map: MapPolyfill
+		Map: MapPolyfill,
+		Marker: MarkerPolyfill
 	}
 };
