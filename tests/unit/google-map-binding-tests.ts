@@ -2,15 +2,15 @@ import Q, { Deferred } from "q";
 import { VueConstructor } from "vue";
 import { Vue } from "vue/types/vue";
 
-import { getter, setter } from "@/strings";
 import DeferredMapObject from "@/components/DeferredMapObject";
 
 import { assertThat, equalTo, is } from "hamjest";
 import * as sinon from "sinon";
 import { SinonSpy, SinonStub } from "sinon";
-import { shallowMount, VueClass, Wrapper } from "@vue/test-utils";
+import { shallowMount, ThisTypedShallowMountOptions, VueClass, Wrapper } from "@vue/test-utils";
 
 import { MVCObjectPolyfill } from "./google-map-stubs";
+import { MabObjectBindingDefinition } from "@/components/MapObjectBindings";
 
 type VueConstructorFactory = () => VueConstructor;
 type VueGoogleMapComponent<APIType extends google.maps.MVCObject> = VueClass<Vue & DeferredMapObject>;
@@ -19,33 +19,36 @@ type VueGoogleMapComponentInstance<APIType extends google.maps.MVCObject> = Vue 
 export interface MapObjectBindingData<APIType extends google.maps.MVCObject> {
 	component: VueGoogleMapComponent<APIType>;
 	objectClassName: string;
-	props: string[];
+	props: MabObjectBindingDefinition[];
 	events: string[];
 	methods: string[];
 }
 
 export function generateComponentBindingTests<APIType extends google.maps.MVCObject>(
-		mapBindings: MapObjectBindingData<APIType>, vue: VueConstructorFactory): void {
+		mapBindings: MapObjectBindingData<APIType>, vueFactory: VueConstructorFactory,
+		options?: ThisTypedShallowMountOptions<any>): void {
 	describe(`${mapBindings.component.name} bindings`, function() {
-		generateConstructorTest(mapBindings, vue);
-		generatePropsTests(mapBindings, vue);
-		generateEventsTests(mapBindings, vue);
-		generateMethodsTests(mapBindings, vue);
+		generateConstructorTest(mapBindings, vueFactory, options);
+		generatePropsTests(mapBindings, vueFactory, options);
+		generateEventsTests(mapBindings, vueFactory, options);
+		generateMethodsTests(mapBindings, vueFactory, options);
 	});
 }
 
 function generateConstructorTest<APIType extends google.maps.MVCObject>(
-		mapBindings: MapObjectBindingData<APIType>, vue: VueConstructorFactory): void {
+		mapBindings: MapObjectBindingData<APIType>, vueFactory: VueConstructorFactory,
+		options?: ThisTypedShallowMountOptions<any>): void {
 	it("should pass options to the constructor", function() {
 		const opts = { a: 1 };
 		const spy: SinonSpy = spyOnConstructor(mapBindings.objectClassName);
 
 		try {
 			shallowMount(mapBindings.component, {
-				localVue: vue(),
+				localVue: vueFactory(),
 				propsData: {
 					options: opts
-				}
+				},
+				...options
 			});
 
 			assertThat(spy.calledOnceWith(sinon.match.any, sinon.match(opts)), is(true));
@@ -57,23 +60,24 @@ function generateConstructorTest<APIType extends google.maps.MVCObject>(
 }
 
 function generatePropsTests<APIType extends google.maps.MVCObject>(
-		mapBindings: MapObjectBindingData<APIType>, vue: VueConstructorFactory): void {
+		mapBindings: MapObjectBindingData<APIType>, vueFactory: VueConstructorFactory,
+		options?: ThisTypedShallowMountOptions<any>): void {
 	describe("props", function() {
 		this.timeout(200);
 
-		mapBindings.props.forEach((prop: string) => {
-			describe(`${prop}`, function() {
-				it(`should reactively bind '${prop}' to setter`, async function() {
-					const set = setter(prop);
-					const spy: sinon.SinonSpy = spyOnMethod(mapBindings.objectClassName, set);
+		mapBindings.props.forEach((prop: MabObjectBindingDefinition) => {
+			describe(`${prop.name}`, function() {
+				it(`should reactively bind '${prop.name}' to setter`, async function() {
+					const spy: sinon.SinonSpy = spyOnMethod(mapBindings.objectClassName, prop.setter!);
 					const val = "value";
 					const newVal = 123;
 
 					const wrapper: Wrapper<VueGoogleMapComponentInstance<APIType>> = shallowMount(mapBindings.component, {
-						localVue: vue(),
+						localVue: vueFactory(),
 						propsData: {
-							[prop]: val
-						}
+							[prop.name]: val
+						},
+						...options
 					});
 
 					await mapObjectToBeSettled(wrapper.vm);
@@ -81,7 +85,7 @@ function generatePropsTests<APIType extends google.maps.MVCObject>(
 					try {
 						assertThat(spy.firstCall.calledWithExactly(val), is(true));
 
-						wrapper.setProps({ [prop]: newVal });
+						wrapper.setProps({ [prop.name]: newVal });
 						assertThat(spy.secondCall.calledWithExactly(newVal), is(true));
 					}
 					finally {
@@ -89,46 +93,50 @@ function generatePropsTests<APIType extends google.maps.MVCObject>(
 					}
 				});
 
-				it(`should bind to '${prop}_changed' event`, function() {
-					const get = getter(prop);
-					const val = "123";
-					const stub = stubMethod(mapBindings.objectClassName, get).returns(val);
+				if (prop.getter) {
+					it(`should bind to '${prop.name}_changed' event`, function() {
+						const val = "123";
+						const stub = stubMethod(mapBindings.objectClassName, prop.getter!).returns(val);
 
-					const wrapper: Wrapper<VueGoogleMapComponentInstance<APIType>> = shallowMount(mapBindings.component, {
-						localVue: vue(),
-						propsData: {
-							[prop]: val
-						}
+						const wrapper: Wrapper<VueGoogleMapComponentInstance<APIType>> = shallowMount(mapBindings.component, {
+							localVue: vueFactory(),
+							propsData: {
+								[prop.name]: val
+							},
+							...options
+						});
+
+						const deferred: Deferred<void> = Q.defer();
+						deferred.promise.finally(() => { stub.restore(); });
+
+						wrapper.vm.$on(`${prop.name}_changed`, (...params: any[]) => {
+							assertThat(params[0], is(equalTo(val)));
+
+							deferred.resolve();
+						});
+
+						wrapper.vm.getMapObject()
+							.then((mapObject: MVCObjectPolyfill) => mapObject.emit(`${prop.name}_changed`));
+
+						return deferred.promise;
 					});
-
-					const deferred: Deferred<void> = Q.defer();
-					deferred.promise.finally(() => { sinon.restore(); });
-
-					wrapper.vm.$on(`${prop}_changed`, (...params: any[]) => {
-						assertThat(params[0], is(equalTo(val)));
-
-						deferred.resolve();
-					});
-
-					wrapper.vm.getMapObject()
-						.then((mapObject: MVCObjectPolyfill) => mapObject.emit(`${prop}_changed`));
-
-					return deferred.promise;
-				});
+				}
 			});
 		});
 	});
 }
 
 function generateEventsTests<APIType extends google.maps.MVCObject>(
-		mapBindings: MapObjectBindingData<APIType>, vue: VueConstructorFactory): void {
+		mapBindings: MapObjectBindingData<APIType>, vueFactory: VueConstructorFactory,
+		options?: ThisTypedShallowMountOptions<any>): void {
 	describe("events", function() {
 		this.timeout(200);
 
 		mapBindings.events.forEach((event: string) => {
 			it(`should emit '${event}'`, function(done) {
 				const wrapper: Wrapper<VueGoogleMapComponentInstance<APIType>> = shallowMount(mapBindings.component, {
-					localVue: vue()
+					localVue: vueFactory(),
+					...options
 				});
 
 				const args = [ 1, "foo", false ];
@@ -152,14 +160,16 @@ function generateEventsTests<APIType extends google.maps.MVCObject>(
 }
 
 function generateMethodsTests<APIType extends google.maps.MVCObject>(
-		mapBindings: MapObjectBindingData<APIType>, vue: VueConstructorFactory): void {
+		mapBindings: MapObjectBindingData<APIType>, vueFactory: VueConstructorFactory,
+		options?: ThisTypedShallowMountOptions<any>): void {
 	describe("methods", function() {
 		mapBindings.methods.forEach((method: string) => {
 			it(`should proxy call to '${method}'`, async function() {
 				const spy: sinon.SinonSpy = spyOnMethod(mapBindings.objectClassName, method);
 
 				const wrapper: Wrapper<VueGoogleMapComponentInstance<APIType>> = shallowMount(mapBindings.component, {
-					localVue: vue()
+					localVue: vueFactory(),
+					...options
 				});
 
 				await mapObjectToBeSettled(wrapper.vm);
