@@ -15,5 +15,15 @@ module.exports = {
     // this tells us that Google Maps has loaded.
     browser.expect.element("#map div.gm-style").to.be.present;
     browser.end();
+  },
+
+  "render marker": (browser) => {
+    browser
+    .url(process.env.VUE_DEV_SERVER_URL)
+    .waitForElementVisible("#app", 5000)
+    .waitForElementPresent("#map", 5000);
+
+    browser.expect.element("#map area[title='Most Liveable City']").to.be.present;
+    browser.end();
   }
 };
