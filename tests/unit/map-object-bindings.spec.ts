@@ -7,7 +7,7 @@ import * as sinon from "sinon";
 
 import { MVCObjectPolyfill } from "./google-map-stubs";
 import GoogleMapComponent from "@/components/GoogleMapComponent";
-import { bindComponentToMapObject } from "@/components/MapObjectBindings";
+import { bindComponentToMapObject, createMapObjectBinding } from "@/components/MapObjectBindings";
 import { Vue } from "vue-property-decorator";
 
 interface DeferredComponent {
@@ -23,6 +23,28 @@ const mapEventListener: google.maps.MapsEventListener = {
 };
 
 describe("MapObjectBindings", function() {
+	describe("create map object binding", function() {
+		it("should create default binding", function() {
+			const name = "center";
+			const binding = createMapObjectBinding(name);
+
+			assertThat(binding.name, is(name));
+			assertThat(binding.getter, is("getCenter"));
+			assertThat(binding.setter, is("setCenter"));
+		});
+
+		it("should use args", function() {
+			const name = "center";
+			const getter = "GET_CENTER";
+			const setter = "SET_CENTER";
+			const binding = createMapObjectBinding(name, getter, setter);
+
+			assertThat(binding.name, is(name));
+			assertThat(binding.getter, is(getter));
+			assertThat(binding.setter, is(setter));
+		});
+	});
+
 	it("should store map object event registration", async function() {
 		const events = [ "event" ];
 
@@ -37,7 +59,7 @@ describe("MapObjectBindings", function() {
 	});
 
 	it("should store prop change event registration", async function() {
-		const props = [ "prop" ];
+		const props = [ createMapObjectBinding("prop") ];
 
 		const vue: VueConstructor = createDeferredComponent(bindComponentToMapObject(props, [], []));
 
@@ -47,6 +69,19 @@ describe("MapObjectBindings", function() {
 		await vm.getMapObject();
 
 		assertThat(vm.$data.subscriptions.length, is(1));
+	});
+
+	it("should not register for changed event when no getter", async function() {
+		const props = [ createMapObjectBinding("prop", null) ];
+
+		const vue: VueConstructor = createDeferredComponent(bindComponentToMapObject(props, [], []));
+
+		const vm: DeferredComponentInstance = shallowMount(vue, createLocalVue()).vm as DeferredComponentInstance;
+		vm.resolve(new MVCObjectPolyfill() as unknown as google.maps.MVCObject);
+
+		await vm.getMapObject();
+
+		assertThat(vm.$data.subscriptions.length, is(0));
 	});
 
 	it("should remove subscriptions on component destroy", async function() {

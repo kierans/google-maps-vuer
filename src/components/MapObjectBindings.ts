@@ -6,16 +6,47 @@ import {
 	ThisTypedComponentOptionsWithArrayProps,
 } from "vue/types/options";
 
-import { getter, setter } from "@/strings";
+import { capitalise } from "@/strings";
 import GoogleMapComponent from "@/components/GoogleMapComponent";
 
-// TODO: Figure out how to define and ExtendedVue type properly
+// TODO: Figure out how to define an ExtendedVue type properly
 type VueBoundGoogleMapComponent = VueConstructor;
 type VueBoundGoogleMapComponentInstance = GoogleMapComponent<any> & MapObjectBindingsData;
 type BindingFunction = (this: VueBoundGoogleMapComponentInstance, names: string[], mapObject: any) => void;
 
 interface MapObjectBindingsData {
 	subscriptions: google.maps.MapsEventListener[];
+}
+
+/**
+ * Defines how to bind a Vue prop to Maps API property.
+ *
+ * In order to bind to the Maps API property, there must be a setter on the Maps API object to call.
+ *
+ * If a getter is present then a listener is placed for the 'changed' event on the Maps API object.
+ *
+ * The default getter and setter names are made by capitalising the first letter of the Maps API property
+ * eg: 'center' becomes 'getCenter' and 'setCenter'. However some properties like 'zindex' don't fit that convention,
+ * so callers will have to override the getter and setter names with the correct values.
+ */
+export interface MabObjectBindingDefinition {
+	/** The name that the prop will be available by on the Vue component */
+	readonly name: string;
+	readonly getter: string | null;
+	readonly setter: string | null;
+}
+
+/**
+ * Create a default {@link MabObjectBindingDefinition} with a getter and setter
+ */
+// tslint:disable-next-line:no-shadowed-variable
+export function createMapObjectBinding(name: string, getter?: string | null, setter?: string | null):
+		MabObjectBindingDefinition {
+	return {
+		name,
+		getter: getter !== undefined ? getter : `get${capitalise(name)}`,
+		setter: setter !== undefined ? setter : `set${capitalise(name)}`
+	} as MabObjectBindingDefinition;
 }
 
 /**
@@ -27,7 +58,7 @@ interface MapObjectBindingsData {
  *
  * @return A Vue mixin.
  */
-export function bindComponentToMapObject(props: string[], events: string[], methods: string[]):
+export function bindComponentToMapObject(props: MabObjectBindingDefinition[], events: string[], methods: string[]):
 		VueBoundGoogleMapComponent {
 	return Vue.extend({
 		data(): MapObjectBindingsData {
@@ -35,7 +66,7 @@ export function bindComponentToMapObject(props: string[], events: string[], meth
 				subscriptions: []
 			} as MapObjectBindingsData;
 		},
-		props,
+		props: props.map((prop: MabObjectBindingDefinition) => prop.name),
 		mounted() {
 			(bindLater.bind(this,
 				bindProps.bind(this, props),
@@ -67,29 +98,29 @@ function bindLater(this: VueBoundGoogleMapComponentInstance, ...fns: BindingFunc
 
 // TODO: Think about type validation for props
 // TODO: Deep watching
-function bindProps(this: VueBoundGoogleMapComponentInstance, props: string[], mapObject: any): void {
-	props.forEach((prop: string) => {
-		const set: string = setter(prop);
-		const get: string = getter(prop);
-		const event: string = `${prop}_changed`;
+function bindProps(this: VueBoundGoogleMapComponentInstance, props: MabObjectBindingDefinition[],
+		mapObject: any): void {
+	props.forEach((prop: MabObjectBindingDefinition) => {
+		const event: string = `${prop.name}_changed`;
 
-		this.$watch(prop, (newVal) => {
-			// TODO: What if there is no getter?
-			const existingVal = mapObject[get].call(mapObject);
+		this.$watch(prop.name, (newVal) => {
+			const existingVal = getter(mapObject, prop);
 
 			// TODO: Vue might do this out of the box
-			if (existingVal !== newVal) {
-				mapObject[set].call(mapObject, newVal);
+			if (existingVal !== newVal && prop.setter) {
+				setter(mapObject, prop, newVal);
 			}
 		}, {
-			immediate: this.$props[prop] !== undefined
+			immediate: this.$props[prop.name] !== undefined
 		});
 
-		this.subscriptions.push(mapObject.addListener(event, () => {
-			const val: any = mapObject[get].call(mapObject);
+		if (prop.getter) {
+			this.subscriptions.push(mapObject.addListener(event, () => {
+				const val: any = getter(mapObject, prop);
 
-			this.$emit(event, val);
-		}));
+				this.$emit(event, val);
+			}));
+		}
 	});
 }
 
@@ -114,4 +145,14 @@ function createMethodProxies(methods: string[]): DefaultMethods<GoogleMapCompone
 
 		return proxies;
 	}, {});
+}
+
+function getter(mapObject: any, prop: MabObjectBindingDefinition): any | undefined {
+	return prop.getter ? mapObject[prop.getter].call(mapObject) : undefined;
+}
+
+function setter(mapObject: any, prop: MabObjectBindingDefinition, value: any): void {
+	if (prop.setter) {
+		mapObject[prop.setter].call(mapObject, value);
+	}
 }

@@ -10,6 +10,7 @@ import "./google-map-stubs";
 
 import GoogleMap from "@/components/GoogleMap.vue";
 import Q from "q";
+import { createMapObjectBinding, MabObjectBindingDefinition } from "@/components/MapObjectBindings";
 
 const VERSION = "1.2.3";
 
@@ -72,9 +73,7 @@ describe("GoogleMap.vue", function() {
 	const mapBindingData = {
 		component: GoogleMap,
 		objectClassName: "google.maps.Map",
-		props: [
-			"center", "clickableIcons", "heading", "mapTypeId", "options", "streetView", "tilt", "zoom"
-		],
+		props: givenProps(),
 		events: [
 			"click", "dblclick", "drag", "dragend", "dragstart", "idle", "mousemove", "mouseout", "mouseover", "rightclick",
 			"tilesloaded"
@@ -94,6 +93,15 @@ function createNewVue(): VueConstructor {
 	};
 
 	return vue;
+}
+
+function givenProps(): MabObjectBindingDefinition[] {
+	const props = [ "center", "clickableIcons", "heading", "mapTypeId", "streetView", "tilt", "zoom" ]
+		.map((prop: string) => createMapObjectBinding(prop));
+
+	props.push(createMapObjectBinding("options", null));
+
+	return props;
 }
 
 @Component({

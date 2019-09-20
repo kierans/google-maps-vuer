@@ -10,12 +10,18 @@ import { mixins } from "vue-class-component";
 import { Component, Prop, Provide, Vue } from "vue-property-decorator";
 
 import DeferredMapObject from "@/components/DeferredMapObject";
-import { bindComponentToMapObject } from "@/components/MapObjectBindings";
+import {
+	bindComponentToMapObject,
+	createMapObjectBinding,
+	MabObjectBindingDefinition
+} from "@/components/MapObjectBindings";
 import GoogleMapComponent from "@/components/GoogleMapComponent";
 
-const props: string[] = [
-	"center", "clickableIcons", "heading", "mapTypeId", "options", "streetView", "tilt", "zoom"
-];
+const props: MabObjectBindingDefinition[] = [
+	"center", "clickableIcons", "heading", "mapTypeId", "streetView", "tilt", "zoom"
+].map((prop) => createMapObjectBinding(prop));
+
+props.push(createMapObjectBinding("options", null));
 
 const events: string[] = [
 	"click", "dblclick", "drag", "dragend", "dragstart", "idle", "mousemove", "mouseout", "mouseover", "rightclick",
