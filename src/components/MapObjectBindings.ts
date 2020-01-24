@@ -52,7 +52,7 @@ export function createMapObjectBinding(name: string, getter?: string | null, set
 /**
  * Binds the Maps API object and the component together.
  *
- * @param props Props to bind to. For example, google.map.Maps has a "center" and a "changed" event.
+ * @param props Props to bind to. For example, google.map.Maps has a "center" and a "center changed" event.
  * @param events Events to proxy.
  * @param methods Methods to proxy.
  *
