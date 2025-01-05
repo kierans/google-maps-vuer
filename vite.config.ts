@@ -7,6 +7,21 @@ import nightwatchPlugin from 'vite-plugin-nightwatch'
 
 // https://vite.dev/config/
 export default defineConfig({
+  build: {
+    lib: {
+      entry: 'src/index.ts', // Main entry point for your library
+      name: 'GoogleMapsVuer', // Global variable name for UMD build
+      fileName: (format) => `google-maps-vuer.${format}.js`,
+    },
+    rollupOptions: {
+      external: ['vue'], // Prevent bundling Vue in the library
+      output: {
+        globals: {
+          vue: 'Vue',
+        },
+      },
+    },
+  },
   plugins: [
     vue(),
     vueDevTools(),
