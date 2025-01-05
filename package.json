@@ -17,11 +17,12 @@
     "lint": "eslint . --fix",
     "preview": "vite preview",
     "test:unit": "vitest",
-    "test:e2e": "nightwatch tests/e2e/*"
+    "test:e2e": "nightwatch tests/e2e/*",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
   },
-  "dependencies": {
-
-  },
+  "dependencies": {},
   "devDependencies": {
     "@nightwatch/vue": "^3.1.2",
     "@tsconfig/node22": "^22.0.0",
@@ -44,6 +45,7 @@
     "vite": "^6.0.5",
     "vite-plugin-nightwatch": "^0.4.6",
     "vite-plugin-vue-devtools": "^7.6.8",
+    "vitepress": "^1.5.0",
     "vitest": "^2.1.8",
     "vue": "^3.5.13",
     "vue-tsc": "^2.1.10"
