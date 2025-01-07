@@ -1,3 +1,5 @@
+import vuetify from "vite-plugin-vuetify";
+
 import { defineConfig } from 'vitepress'
 
 // https://vitepress.dev/reference/site-config
@@ -27,7 +29,18 @@ export default defineConfig({
       { icon: 'github', link: 'https://github.com/vuejs/vitepress' }
     ]
   },
+
+  /*
+   * This config is merged with the default VitePress Vite configuration.
+   * The merging is deep and additive for most fields
+   */
   vite: {
+    /*
+     * This array is combined with the default; which is why vue() is not used here.
+     */
+    plugins: [
+      vuetify()
+    ],
     server: {
       port: 8080
     }
